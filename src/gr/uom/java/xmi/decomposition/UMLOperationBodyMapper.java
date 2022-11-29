@@ -5349,6 +5349,19 @@ public class UMLOperationBodyMapper implements Comparable<UMLOperationBodyMapper
 				}
 				return replacementInfo.getReplacements();
 			}
+			else if(invocationCoveringTheEntireStatement1.renamedWithDifferentArguments(invocationCoveringTheEntireStatement2, replacementInfo.getReplacements(), parameterToArgumentMap, UMLClassBaseDiff.MAX_OPERATION_NAME_DISTANCE, lambdaMappers)){
+				ReplaceNotOperatorDetection detector = new ReplaceNotOperatorDetection(invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2);
+				ReplaceNotOperatorRefactoring notOperator = detector.check();
+				if(Objects.nonNull(notOperator)){
+					refactorings.add(notOperator);
+				}
+
+				ReplaceReservedWordsDetection detectorReservedWords = new ReplaceReservedWordsDetection(invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2);
+				ReplaceReservedWordsRefactoring reservedWords = detectorReservedWords.check();
+				if(Objects.nonNull(reservedWords)){
+					refactorings.add(reservedWords);
+				}
+			}
 			else if(invocationCoveringTheEntireStatement1.inlinedStatementBecomesAdditionalArgument(invocationCoveringTheEntireStatement2, replacementInfo.getReplacements(), replacementInfo.statements1)) {
 				Replacement replacement = new MethodInvocationReplacement(invocationCoveringTheEntireStatement1.actualString(),
 						invocationCoveringTheEntireStatement2.actualString(), invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2, ReplacementType.METHOD_INVOCATION_ARGUMENT);

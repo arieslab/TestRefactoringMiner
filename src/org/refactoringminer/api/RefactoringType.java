@@ -106,7 +106,9 @@ public enum RefactoringType {
     INVERT_CONDITION("Invert Condition", "Invert Condition (.+) to (.+) in method (.+) from class (.+)"),
     REPLACE_EXPECTED_WITH_ASSERT_THROWS("Replace @test(expected) with assertThrows", "Replace (.+) with (.+) in method (.+) from class (.+)"),
     REPLACE_TRY_FAIL_WITH_RULE("Replace try/catch With Rule", "Replace (.+) with (.+) in method (.+) from class (.+)"),
-    ADD_ASSERT_ARG("Add Assert Argument", "Add Assert Argument (.+) in class (.+)");
+    ADD_ASSERT_ARG("Add Assert Argument", "Add Assert Argument (.+) in class (.+)"),
+    REPLACE_NOT_OPERATOR("Replace NOT operator", "Replace (.+) in class (.+)" ),
+    REPLACE_RESERVED_WORDS("Replace Reserved Words", "Replace (.+) in class (.+)");
 
 
     private String displayName;
@@ -207,6 +209,7 @@ public enum RefactoringType {
 //            INVERT_CONDITION,
             ADD_ASSERT_ARG,
             REPLACE_EXPECTED_WITH_ASSERT_THROWS,
+            REPLACE_NOT_OPERATOR,
 //            REPLACE_TRY_FAIL_WITH_RULE
     };
 

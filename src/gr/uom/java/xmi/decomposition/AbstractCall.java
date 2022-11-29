@@ -302,6 +302,20 @@ public abstract class AbstractCall implements LocationInfoProvider {
 		return true;
 	}
 
+	public boolean renamedWithDifferentArguments(AbstractCall call, Set<Replacement> replacements, Map<String, String> parameterToArgumentMap, double distance, List<UMLOperationBodyMapper> lambdaMappers) {
+		boolean allExactLambdaMappers = lambdaMappers.size() > 0;
+		for(UMLOperationBodyMapper lambdaMapper : lambdaMappers) {
+			if(!lambdaMapper.allMappingsAreExactMatches()) {
+				allExactLambdaMappers = false;
+				break;
+			}
+		}
+		return
+				(normalizedNameDistance(call) <= distance || allExactLambdaMappers || (this.methodNameContainsArgumentName() && call.methodNameContainsArgumentName()) || argumentIntersectionContainsClassInstanceCreation(call)) &&
+						!equalArguments(call) &&
+						!this.argumentContainsAnonymousClassDeclaration() && !call.argumentContainsAnonymousClassDeclaration();
+	}
+
 	public boolean identicalOrWrappedArguments(AbstractCall call) {
 		List<String> arguments1 = getArguments();
 		List<String> arguments2 = call.getArguments();
