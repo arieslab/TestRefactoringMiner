@@ -21,47 +21,10 @@ import gr.uom.java.xmi.decomposition.replacement.Replacement;
 import gr.uom.java.xmi.decomposition.replacement.Replacement.ReplacementType;
 import gr.uom.java.xmi.decomposition.replacement.VariableReplacementWithMethodInvocation;
 import gr.uom.java.xmi.decomposition.replacement.VariableReplacementWithMethodInvocation.Direction;
-import gr.uom.java.xmi.diff.UMLAnonymousClassDiff;
-import gr.uom.java.xmi.diff.UMLClassBaseDiff;
-import gr.uom.java.xmi.diff.AddParameterRefactoring;
-import gr.uom.java.xmi.diff.CandidateAttributeRefactoring;
-import gr.uom.java.xmi.diff.CandidateMergeVariableRefactoring;
-import gr.uom.java.xmi.diff.CandidateSplitVariableRefactoring;
-import gr.uom.java.xmi.diff.ExtractOperationRefactoring;
-import gr.uom.java.xmi.diff.ExtractVariableRefactoring;
-import gr.uom.java.xmi.diff.InlineOperationRefactoring;
-import gr.uom.java.xmi.diff.InlineVariableRefactoring;
-import gr.uom.java.xmi.diff.InvertConditionRefactoring;
-import gr.uom.java.xmi.diff.MergeVariableRefactoring;
-import gr.uom.java.xmi.diff.ReferenceBasedRefactoring;
-import gr.uom.java.xmi.diff.RemoveParameterRefactoring;
-import gr.uom.java.xmi.diff.ReplaceAnonymousWithLambdaRefactoring;
-import gr.uom.java.xmi.diff.ReplaceLoopWithPipelineRefactoring;
-import gr.uom.java.xmi.diff.ReplacePipelineWithLoopRefactoring;
-import gr.uom.java.xmi.diff.SplitConditionalRefactoring;
-import gr.uom.java.xmi.diff.SplitVariableRefactoring;
-import gr.uom.java.xmi.diff.StringDistance;
-import gr.uom.java.xmi.diff.UMLAbstractClassDiff;
-import gr.uom.java.xmi.diff.UMLClassMoveDiff;
-import gr.uom.java.xmi.diff.UMLModelDiff;
-import gr.uom.java.xmi.diff.UMLOperationDiff;
-import gr.uom.java.xmi.diff.UMLParameterDiff;
+import gr.uom.java.xmi.diff.*;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -5379,6 +5342,11 @@ public class UMLOperationBodyMapper implements Comparable<UMLOperationBodyMapper
 				Replacement replacement = new MethodInvocationReplacement(invocationCoveringTheEntireStatement1.actualString(),
 						invocationCoveringTheEntireStatement2.actualString(), invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2, ReplacementType.METHOD_INVOCATION_ARGUMENT);
 				replacementInfo.addReplacement(replacement);
+				AddArgsToAssertDetection detector = new AddArgsToAssertDetection(invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2);
+				AddArgsToAssertRefactoring assertArg = detector.check();
+				if(Objects.nonNull(assertArg)){
+					refactorings.add(assertArg);
+				}
 				return replacementInfo.getReplacements();
 			}
 			else if(invocationCoveringTheEntireStatement1.inlinedStatementBecomesAdditionalArgument(invocationCoveringTheEntireStatement2, replacementInfo.getReplacements(), replacementInfo.statements1)) {

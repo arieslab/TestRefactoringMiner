@@ -488,6 +488,7 @@ public abstract class UMLAbstractClassDiff {
 				.map(mapper -> new TestOperationDiff(mapper, this, refactorings))
 				.flatMap(testDiff -> testDiff.getRefactorings().stream())
 				.collect(Collectors.toList()));
+		System.out.println(refactorings);
 
 	}
 

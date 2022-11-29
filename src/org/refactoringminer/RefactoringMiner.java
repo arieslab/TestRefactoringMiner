@@ -67,6 +67,7 @@ public class RefactoringMiner {
 				private int commitCount = 0;
 				@Override
 				public void handle(String commitId, List<Refactoring> refactorings) {
+					System.out.println("------- "+commitId);
 					if(commitCount > 0) {
 						betweenCommitsJSON();
 					}

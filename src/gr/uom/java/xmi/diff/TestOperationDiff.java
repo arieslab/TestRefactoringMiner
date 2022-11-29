@@ -45,9 +45,10 @@ public class TestOperationDiff {
     }
 
     public ExpectedAnnotationToAssertThrowsRefactoring getJUnit4ExpectedExceptionToJUnit5AssertThrowsRefactoring() {
-        var detector = new ExpectedAnnotationToAssertThrowsDetection(removed, added, refactorings);
+        ExpectedAnnotationToAssertThrowsDetection detector = new ExpectedAnnotationToAssertThrowsDetection(removed, added, refactorings);
         return detector.check();
     }
+
 
     public Set<Refactoring> getRefactorings() {
         Set<Refactoring> refactorings = new LinkedHashSet<>();
@@ -59,6 +60,7 @@ public class TestOperationDiff {
         if (Objects.nonNull(jUnit4To5Refactoring)) {
             refactorings.add(jUnit4To5Refactoring);
         }
+
         return refactorings;
     }
 }
