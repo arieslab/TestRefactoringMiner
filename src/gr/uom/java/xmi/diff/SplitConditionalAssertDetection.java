@@ -3,6 +3,7 @@ package gr.uom.java.xmi.diff;
 import gr.uom.java.xmi.decomposition.AbstractCall;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class SplitConditionalAssertDetection {
     private AbstractCall operationBefore = null;
@@ -19,14 +20,35 @@ public class SplitConditionalAssertDetection {
 
     public SplitConditionalAssertRefactoring check() {
         if(operationBefore.toString().contains("assert") && operationAfter.toString().contains("assert")) {
-            if ((operationBefore.getName().equals("assertEquals") || operationBefore.getName().equals("assertNotEquals")) &&
-                    (operationAfter.getName().equals("assertTrue") || operationAfter.getName().equals("assertFalse") || operationAfter.getName().equals("assertNull"))){
-                ArrayList removeArgsEqual = new ArrayList(operationBefore.getArguments());
-                removeArgsEqual.removeAll(operationAfter.getArguments());
-                if(removeArgsEqual.size()==1 && (removeArgsEqual.get(0).equals("true") || removeArgsEqual.get(0).equals("false") || removeArgsEqual.get(0).equals("null"))){
-                    operation1 = operationBefore;
-                    operation2 = operationAfter;
-                    return new SplitConditionalAssertRefactoring(operation1, operation2);
+            if ((operationBefore.getName().equals("assertTrue") || operationBefore.getName().equals("assertFalse") || operationBefore.getName().equals("assertNull") || operationBefore.getName().equals("assertNotNull")) &&
+                    (operationAfter.getName().equals("assertEquals") || operationAfter.getName().equals("assertNotEquals") || operationAfter.getName().equals("assertSame") || operationAfter.getName().equals("assertNotSame") || operationAfter.getName().equals("assertThat") || operationAfter.getName().equals("assertNotThat"))){
+                String[] match = {".equals", ".contains", "==", "<=", ">=", "!=", "<", ">"};
+                for (int i = 0; i < operationBefore.getArguments().size(); i++) {
+                    if (!operationBefore.getArguments().get(i).contains("\"")){
+                        for(int j = 0; j < match.length; j++){
+                            if(operationBefore.getArguments().get(i).contains(match[j])) {
+                                String inv = operationBefore.getArguments().get(i);
+                                String[] splitParam = inv.split(match[j]);
+                                if(splitParam[1].contains(")")) {
+                                    splitParam[1] = splitParam[1].replace(")", "");
+                                }
+                                if(splitParam[1].contains("(")) {
+                                    splitParam[1] = splitParam[1].replace("(", "");
+                                }
+                                if(splitParam[1].contains("\s")) {
+                                    splitParam[1] = splitParam[1].replace("\s", "");
+                                }
+                                if(splitParam[0].contains("\s")) {
+                                    splitParam[0] = splitParam[0].replace("\s", "");
+                                }
+                                if(operationAfter.getArguments().containsAll(Arrays.asList(splitParam))){
+                                    operation1 = operationBefore;
+                                    operation2 = operationAfter;
+                                    return new SplitConditionalAssertRefactoring(operation1, operation2);
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
