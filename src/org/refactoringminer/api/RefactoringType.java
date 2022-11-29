@@ -108,7 +108,8 @@ public enum RefactoringType {
     REPLACE_TRY_FAIL_WITH_RULE("Replace try/catch With Rule", "Replace (.+) with (.+) in method (.+) from class (.+)"),
     ADD_ASSERT_ARG("Add Assert Argument", "Add Assert Argument (.+) in class (.+)"),
     REPLACE_NOT_OPERATOR("Replace NOT operator", "Replace (.+) in class (.+)" ),
-    REPLACE_RESERVED_WORDS("Replace Reserved Words", "Replace (.+) in class (.+)");
+    REPLACE_RESERVED_WORDS("Replace Reserved Words", "Replace (.+) in class (.+)"),
+    SPLIT_CONDITIONAL_ASSERT("Split Conditional Statement in Assertions", "Replace (.+) in class (.+)");
 
 
     private String displayName;
@@ -210,6 +211,9 @@ public enum RefactoringType {
             ADD_ASSERT_ARG,
             REPLACE_EXPECTED_WITH_ASSERT_THROWS,
             REPLACE_NOT_OPERATOR,
+            REPLACE_RESERVED_WORDS,
+            SPLIT_CONDITIONAL_ASSERT,
+
 //            REPLACE_TRY_FAIL_WITH_RULE
     };
 

@@ -5361,6 +5361,12 @@ public class UMLOperationBodyMapper implements Comparable<UMLOperationBodyMapper
 				if(Objects.nonNull(reservedWords)){
 					refactorings.add(reservedWords);
 				}
+
+				SplitConditionalAssertDetection detectorSplitConditional = new SplitConditionalAssertDetection(invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2);
+				SplitConditionalAssertRefactoring splitConditional = detectorSplitConditional.check();
+				if(Objects.nonNull(splitConditional)){
+					refactorings.add(splitConditional);
+				}
 			}
 			else if(invocationCoveringTheEntireStatement1.inlinedStatementBecomesAdditionalArgument(invocationCoveringTheEntireStatement2, replacementInfo.getReplacements(), replacementInfo.statements1)) {
 				Replacement replacement = new MethodInvocationReplacement(invocationCoveringTheEntireStatement1.actualString(),
