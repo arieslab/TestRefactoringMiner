@@ -1,48 +1,40 @@
 package gr.uom.java.xmi.diff;
 
-import gr.uom.java.xmi.UMLOperation;
 import gr.uom.java.xmi.decomposition.AbstractCall;
-import gr.uom.java.xmi.decomposition.LambdaExpressionObject;
-import gr.uom.java.xmi.decomposition.OperationInvocation;
-import org.refactoringminer.api.Refactoring;
-import org.refactoringminer.api.RefactoringType;
+import gr.uom.java.xmi.decomposition.UMLOperationBodyMapper;
+import gr.uom.java.xmi.decomposition.replacement.MethodInvocationReplacement;
+import gr.uom.java.xmi.decomposition.replacement.Replacement;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class AddArgsToAssertDetection {
-    private AbstractCall operationBefore = null;
-    private AbstractCall operationAfter = null;
+    private final UMLOperationBodyMapper mapper;
     private AbstractCall operation2;
     private AbstractCall operation1;
 
-    public AddArgsToAssertDetection(UMLOperation operationBefore, UMLOperation operationAfter) {
-        // this.operationBefore = operationBefore;
-        //this.operationAfter = operationAfter;
-    }
 
-    public AddArgsToAssertDetection(AbstractCall operationBefore, AbstractCall operationAfter) {
-        this.operationBefore = operationBefore;
-        this.operationAfter = operationAfter;
+    public AddArgsToAssertDetection(UMLOperationBodyMapper mapper) {
+        this.mapper = mapper;
     }
 
 
-    public AddArgsToAssertRefactoring check() {
 
-        if (operationBefore.toString().contains("assert") && operationAfter.toString().contains("assert")) {
-            if (operationBefore != null && operationAfter != null) {
-                if (operationBefore.getArguments().size() < operationAfter.getArguments().size()) {
-                    List rem = new ArrayList(operationAfter.getArguments());
-                    rem.removeAll(operationBefore.getArguments());
+    public ArrayList<AddArgsToAssertRefactoring> check() {
+        ArrayList<AddArgsToAssertRefactoring> lista = new ArrayList<>();
+        for (MethodInvocationReplacement replacement:
+        mapper.getMethodInvocationRenameReplacements()) {
+            if (replacement.getBefore().contains("assert") && replacement.getAfter().contains("assert") &&
+                    replacement.getBefore() != null && replacement.getAfter() != null ) {
+                if (replacement.getInvokedOperationBefore().getArguments().size() <
+                        replacement.getInvokedOperationAfter().getArguments().size()) {
+                    List rem = new ArrayList(replacement.getInvokedOperationAfter().getArguments());
+                    rem.removeAll(replacement.getInvokedOperationBefore().getArguments());
                     if (rem.size() == 1 && rem.get(0).toString().contains("\"")) {
-                        operation1 = operationBefore;
-                        operation2 = operationAfter;
-                        return new AddArgsToAssertRefactoring(operation1, operation2);
+                        lista.add (new AddArgsToAssertRefactoring(replacement.getInvokedOperationBefore(), replacement.getInvokedOperationAfter()));
                     }
                 }
             }
         }
-        return null;
-
+        return lista;
     }
 }

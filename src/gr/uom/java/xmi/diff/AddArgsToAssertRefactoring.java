@@ -33,7 +33,7 @@ public class AddArgsToAssertRefactoring implements Refactoring {
     public List<CodeRange> leftSide() {
         List<CodeRange> ranges = new ArrayList<>();
         ranges.add(operationBefore.codeRange()
-                .setDescription("source method declaration before migration")
+                .setDescription("original assert method invocation")
                 .setCodeElement(operationBefore.toString()));
         return ranges;
     }
@@ -42,7 +42,7 @@ public class AddArgsToAssertRefactoring implements Refactoring {
     public List<CodeRange> rightSide() {
         List<CodeRange> ranges = new ArrayList<>();
         ranges.add(operationAfter.codeRange()
-                .setDescription("method declaration after migration")
+                .setDescription("assert method invocation with added argument")
                 .setCodeElement(operationAfter.toString()));
         return ranges;
     }
@@ -70,11 +70,6 @@ public class AddArgsToAssertRefactoring implements Refactoring {
         Set<ImmutablePair<String, String>> pairs = new LinkedHashSet<>();
         pairs.add(new ImmutablePair<>(operationAfter.getLocationInfo().getFilePath(), operationAfter.getName()));
         return pairs;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(operationAfter, operationBefore);
     }
 
     @Override

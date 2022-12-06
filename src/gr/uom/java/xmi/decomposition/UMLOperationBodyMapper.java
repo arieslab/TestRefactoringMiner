@@ -5338,37 +5338,42 @@ public class UMLOperationBodyMapper implements Comparable<UMLOperationBodyMapper
 			if(invocationCoveringTheEntireStatement1.identicalWithMergedArguments(invocationCoveringTheEntireStatement2, replacementInfo.getReplacements(), parameterToArgumentMap)) {
 				return replacementInfo.getReplacements();
 			}
-			else if(invocationCoveringTheEntireStatement1.identicalWithDifferentNumberOfArguments(invocationCoveringTheEntireStatement2, replacementInfo.getReplacements(), parameterToArgumentMap)) {
+			if(invocationCoveringTheEntireStatement1.identicalWithDifferentNumberOfArguments(invocationCoveringTheEntireStatement2, replacementInfo.getReplacements(), parameterToArgumentMap)) {
+//				AddArgsToAssertDetection detector1 = new AddArgsToAssertDetection(invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2);
+//				AddArgsToAssertRefactoring assertArg = detector1.check();
+//				if(Objects.nonNull(assertArg)){
+//					refactorings.add(assertArg);
+//				}
 				Replacement replacement = new MethodInvocationReplacement(invocationCoveringTheEntireStatement1.actualString(),
 						invocationCoveringTheEntireStatement2.actualString(), invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2, ReplacementType.METHOD_INVOCATION_ARGUMENT);
 				replacementInfo.addReplacement(replacement);
-				AddArgsToAssertDetection detector = new AddArgsToAssertDetection(invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2);
-				AddArgsToAssertRefactoring assertArg = detector.check();
-				if(Objects.nonNull(assertArg)){
-					refactorings.add(assertArg);
-				}
+		//		System.out.println(replacement.getBefore()+"   "+replacement.getAfter());
 				return replacementInfo.getReplacements();
+		}
+			if(invocationCoveringTheEntireStatement1.renamedWithDifferentArguments(invocationCoveringTheEntireStatement2, replacementInfo.getReplacements(), parameterToArgumentMap, UMLClassBaseDiff.MAX_OPERATION_NAME_DISTANCE, lambdaMappers)){
+				Replacement replacement = new MethodInvocationReplacement(invocationCoveringTheEntireStatement1.actualString(),
+						invocationCoveringTheEntireStatement2.actualString(), invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2, ReplacementType.METHOD_INVOCATION_ARGUMENT);
+				replacementInfo.addReplacement(replacement);
+		//		System.out.println(replacement.getBefore()+"   "+replacement.getAfter());
+				return replacementInfo.getReplacements();
+//				ReplaceNotOperatorDetection detector = new ReplaceNotOperatorDetection(invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2);
+//				ReplaceNotOperatorRefactoring notOperator = detector.check();
+//					if(Objects.nonNull(notOperator)){
+//						refactorings.add(notOperator);
+//				}
+//				ReplaceReservedWordsDetection detectorReservedWords = new ReplaceReservedWordsDetection(invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2);
+//				ReplaceReservedWordsRefactoring reservedWords = detectorReservedWords.check();
+//				if(Objects.nonNull(reservedWords)){
+//					refactorings.add(reservedWords);
+//				}
+//
+//				SplitConditionalAssertDetection detectorSplitConditional = new SplitConditionalAssertDetection(invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2);
+//				SplitConditionalAssertRefactoring splitConditional = detectorSplitConditional.check();
+//				if(Objects.nonNull(splitConditional)){
+//					refactorings.add(splitConditional);
+//				}
 			}
-			else if(invocationCoveringTheEntireStatement1.renamedWithDifferentArguments(invocationCoveringTheEntireStatement2, replacementInfo.getReplacements(), parameterToArgumentMap, UMLClassBaseDiff.MAX_OPERATION_NAME_DISTANCE, lambdaMappers)){
-				ReplaceNotOperatorDetection detector = new ReplaceNotOperatorDetection(invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2);
-				ReplaceNotOperatorRefactoring notOperator = detector.check();
-				if(Objects.nonNull(notOperator)){
-					refactorings.add(notOperator);
-				}
-
-				ReplaceReservedWordsDetection detectorReservedWords = new ReplaceReservedWordsDetection(invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2);
-				ReplaceReservedWordsRefactoring reservedWords = detectorReservedWords.check();
-				if(Objects.nonNull(reservedWords)){
-					refactorings.add(reservedWords);
-				}
-
-				SplitConditionalAssertDetection detectorSplitConditional = new SplitConditionalAssertDetection(invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2);
-				SplitConditionalAssertRefactoring splitConditional = detectorSplitConditional.check();
-				if(Objects.nonNull(splitConditional)){
-					refactorings.add(splitConditional);
-				}
-			}
-			else if(invocationCoveringTheEntireStatement1.inlinedStatementBecomesAdditionalArgument(invocationCoveringTheEntireStatement2, replacementInfo.getReplacements(), replacementInfo.statements1)) {
+			if(invocationCoveringTheEntireStatement1.inlinedStatementBecomesAdditionalArgument(invocationCoveringTheEntireStatement2, replacementInfo.getReplacements(), replacementInfo.statements1)) {
 				Replacement replacement = new MethodInvocationReplacement(invocationCoveringTheEntireStatement1.actualString(),
 						invocationCoveringTheEntireStatement2.actualString(), invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2, ReplacementType.METHOD_INVOCATION_ARGUMENT);
 				replacementInfo.addReplacement(replacement);

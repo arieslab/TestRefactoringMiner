@@ -49,6 +49,10 @@ public class TestOperationDiff {
         return detector.check();
     }
 
+    private ArrayList<AddArgsToAssertRefactoring> getAddArgs() {
+            AddArgsToAssertDetection detector1 = new AddArgsToAssertDetection(mapper);
+        return detector1.check();
+    }
 
     public Set<Refactoring> getRefactorings() {
         Set<Refactoring> refactorings = new LinkedHashSet<>();
@@ -61,6 +65,10 @@ public class TestOperationDiff {
             refactorings.add(jUnit4To5Refactoring);
         }
 
+        ArrayList<AddArgsToAssertRefactoring> assertArg = getAddArgs();
+            if(Objects.nonNull(assertArg)){
+                refactorings.addAll(assertArg);
+            }
         return refactorings;
-    }
+        }
 }
