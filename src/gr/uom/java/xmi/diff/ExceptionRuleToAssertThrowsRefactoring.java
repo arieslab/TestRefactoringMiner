@@ -1,0 +1,108 @@
+package gr.uom.java.xmi.diff;
+
+import gr.uom.java.xmi.UMLAttribute;
+import gr.uom.java.xmi.UMLOperation;
+import gr.uom.java.xmi.decomposition.AbstractCall;
+import gr.uom.java.xmi.decomposition.LambdaExpressionObject;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.refactoringminer.api.Refactoring;
+import org.refactoringminer.api.RefactoringType;
+
+import java.util.*;
+
+public class ExceptionRuleToAssertThrowsRefactoring implements Refactoring {
+    private final UMLOperation operationBefore;
+    private final UMLOperation operationAfter;
+    private final LambdaExpressionObject lambda;
+    private final AbstractCall assertThrows;
+
+   private final AbstractCall thrownExpectInvocations;
+
+    private final  UMLAttribute expectedExceptionFieldDeclaration;
+
+    public ExceptionRuleToAssertThrowsRefactoring(UMLOperation operationBefore, UMLOperation operationAfter,
+                                                  LambdaExpressionObject lambda, AbstractCall assertThrows,
+                                                  UMLAttribute ruleFieldDeclaration,
+                                               AbstractCall thrownExpectInvocations) {
+        this.operationBefore = operationBefore;
+        this.operationAfter = operationAfter;
+        this.lambda = lambda;
+        this.assertThrows = assertThrows;
+       this.thrownExpectInvocations = thrownExpectInvocations;
+        this.expectedExceptionFieldDeclaration = ruleFieldDeclaration;
+    }
+
+
+    @Override
+    public List<CodeRange> leftSide() {
+        List<CodeRange> ranges = new ArrayList<>();
+        ranges.add(operationBefore.codeRange()
+                .setDescription("method declaration before migration")
+                .setCodeElement(operationAfter.toString()));
+        ranges.add(expectedExceptionFieldDeclaration.codeRange()
+                .setDescription("ExpectedException field annotated with @Rule")
+                .setCodeElement(expectedExceptionFieldDeclaration.toString()));
+        ranges.add(thrownExpectInvocations.codeRange()
+                .setDescription("method's statement invoking ExpectedException's expect method")
+                .setCodeElement(thrownExpectInvocations.toString()));
+        return ranges;
+    }
+
+    @Override
+    public List<CodeRange> rightSide() {
+        List<CodeRange> ranges = new ArrayList<>();
+        ranges.add(operationAfter.codeRange()
+                .setDescription("method declaration after migration")
+                .setCodeElement(operationAfter.toString()));
+        ranges.add(assertThrows.codeRange()
+                .setDescription("added Assert.assertThrows call")
+                .setCodeElement(assertThrows.toString()));
+        ranges.add(lambda.codeRange()
+                .setDescription("extracted lambda from method's body")
+                .setCodeElement(lambda.toString()));
+        return ranges;
+    }
+
+    @Override
+    public RefactoringType getRefactoringType() {
+        return RefactoringType.REPLACE_RULE_WITH_ASSERT_THROWS;
+    }
+
+    @Override
+    public String getName() {
+        return this.getRefactoringType().getDisplayName();
+    }
+
+    @Override
+    public Set<ImmutablePair<String, String>> getInvolvedClassesBeforeRefactoring() {
+        Set<ImmutablePair<String, String>> pairs = new LinkedHashSet<>();
+        pairs.add(new ImmutablePair<>(operationBefore.getLocationInfo().getFilePath(), operationBefore.getClassName()));
+        return pairs;
+    }
+
+    @Override
+    public Set<ImmutablePair<String, String>> getInvolvedClassesAfterRefactoring() {
+        Set<ImmutablePair<String, String>> pairs = new LinkedHashSet<>();
+        pairs.add(new ImmutablePair<>(operationAfter.getLocationInfo().getFilePath(), operationAfter.getClassName()));
+        return pairs;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(operationAfter, operationBefore);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ExceptionRuleToAssertThrowsRefactoring other = (ExceptionRuleToAssertThrowsRefactoring) obj;
+        return  Objects.equals(operationAfter, other.operationAfter)
+                && Objects.equals(operationBefore, other.operationBefore)
+                ;
+    }
+}

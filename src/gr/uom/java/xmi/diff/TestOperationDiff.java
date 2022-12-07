@@ -16,11 +16,13 @@ public class TestOperationDiff {
     private final UMLOperation added;
     private final Collection<Refactoring> refactorings = new LinkedHashSet<>();
     private List<UMLAttribute> addedAttributes;
+    private List<UMLAttribute> removedAttributes;
     private UMLOperationBodyMapper mapper;
 
     public TestOperationDiff(UMLOperationBodyMapper mapper, UMLAbstractClassDiff classDiff, Collection<Refactoring> refactorings) {
         this(mapper.getOperation1(), mapper.getOperation2(), refactorings);
         addedAttributes = classDiff.addedAttributes;
+        removedAttributes = classDiff.removedAttributes;
         this.mapper = mapper;
     }
 
@@ -49,10 +51,16 @@ public class TestOperationDiff {
         return detector.check();
     }
 
+    private ExceptionRuleToAssertThrowsRefactoring getExceptionToAssertThows() {
+        ExceptionRuleToAssertThrowsDetection detector = new ExceptionRuleToAssertThrowsDetection(mapper, refactorings, removedAttributes);
+        return detector.check();
+    }
+
     private ArrayList<AddArgsToAssertRefactoring> getAddArgs() {
             AddArgsToAssertDetection detector1 = new AddArgsToAssertDetection(mapper);
         return detector1.check();
     }
+
 
     public Set<Refactoring> getRefactorings() {
         Set<Refactoring> refactorings = new LinkedHashSet<>();
@@ -64,11 +72,16 @@ public class TestOperationDiff {
         if (Objects.nonNull(jUnit4To5Refactoring)) {
             refactorings.add(jUnit4To5Refactoring);
         }
-
+        ExceptionRuleToAssertThrowsRefactoring exceptionToAssertThows = getExceptionToAssertThows();
+        if (Objects.nonNull(exceptionToAssertThows)) {
+            refactorings.add(exceptionToAssertThows);
+        }
         ArrayList<AddArgsToAssertRefactoring> assertArg = getAddArgs();
-            if(Objects.nonNull(assertArg)){
-                refactorings.addAll(assertArg);
-            }
+        if(Objects.nonNull(assertArg)){
+            refactorings.addAll(assertArg);
+        }
         return refactorings;
         }
+
+
 }
