@@ -41,8 +41,7 @@ public class TestOperationDiff {
     }
 
     public TryWithFailToExpectedExceptionRuleRefactoring getJUnit3AssertFailToJUnit4ExpectedExceptionRefactoring() {
-        TryWithFailToExpectedExceptionRuleDetection detector;
-        detector = new TryWithFailToExpectedExceptionRuleDetection(mapper, addedAttributes);
+        TryWithFailToExpectedExceptionRuleDetection detector = new TryWithFailToExpectedExceptionRuleDetection(mapper, addedAttributes);
         return detector.check();
     }
 
@@ -53,6 +52,11 @@ public class TestOperationDiff {
 
     private ExceptionRuleToAssertThrowsRefactoring getExceptionToAssertThows() {
         ExceptionRuleToAssertThrowsDetection detector = new ExceptionRuleToAssertThrowsDetection(mapper, refactorings, removedAttributes);
+        return detector.check();
+    }
+
+    private TryWithFailToAssertRefactoring getTryToAssert() {
+        TryWithFailToAssertDetection detector = new TryWithFailToAssertDetection(mapper);
         return detector.check();
     }
 
@@ -76,12 +80,15 @@ public class TestOperationDiff {
         if (Objects.nonNull(exceptionToAssertThows)) {
             refactorings.add(exceptionToAssertThows);
         }
+        TryWithFailToAssertRefactoring tryToAssert = getTryToAssert();
+        if (Objects.nonNull(tryToAssert)) {
+            refactorings.add(tryToAssert);
+        }
         ArrayList<AddArgsToAssertRefactoring> assertArg = getAddArgs();
         if(Objects.nonNull(assertArg)){
             refactorings.addAll(assertArg);
         }
         return refactorings;
-        }
-
+    }
 
 }
