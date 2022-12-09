@@ -32,7 +32,7 @@ public class ReplaceNotOperatorRefactoring  implements Refactoring {
     public List<CodeRange> leftSide() {
         List<CodeRange> ranges = new ArrayList<>();
         ranges.add(operationBefore.codeRange()
-                .setDescription("source method declaration before migration")
+                .setDescription("original assert method invocation")
                 .setCodeElement(operationBefore.toString()));
         return ranges;
     }
@@ -41,7 +41,7 @@ public class ReplaceNotOperatorRefactoring  implements Refactoring {
     public List<CodeRange> rightSide() {
         List<CodeRange> ranges = new ArrayList<>();
         ranges.add(operationAfter.codeRange()
-                .setDescription("method declaration after migration")
+                .setDescription("method invocation after replacing the not operator")
                 .setCodeElement(operationAfter.toString()));
         return ranges;
     }
@@ -71,10 +71,7 @@ public class ReplaceNotOperatorRefactoring  implements Refactoring {
         return pairs;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(operationAfter, operationBefore);
-    }
+
 
     @Override
     public boolean equals(Object obj) {

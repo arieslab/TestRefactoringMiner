@@ -17,18 +17,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -90,7 +81,7 @@ public class GitHistoryRefactoringMinerImpl implements GitHistoryRefactoringMine
 		}
 	}
 	
-	private void detect(GitService gitService, Repository repository, final RefactoringHandler handler, Iterator<RevCommit> i) {
+	private void detect(GitService gitService, Repository repository, final RefactoringHandler handler, Iterator<RevCommit> i) throws ParseException {
 		int commitsCount = 0;
 		int errorCommitsCount = 0;
 		int refactoringsCount = 0;
@@ -98,28 +89,38 @@ public class GitHistoryRefactoringMinerImpl implements GitHistoryRefactoringMine
 		File metadataFolder = repository.getDirectory();
 		File projectFolder = metadataFolder.getParentFile();
 		String projectName = projectFolder.getName();
-		
+
+		Date since = new SimpleDateFormat("yyyy-MM-dd").parse("2019-01-01");
+		Date until = new SimpleDateFormat("yyyy-MM-dd").parse("2022-07-21");
+
 		long time = System.currentTimeMillis();
 		while (i.hasNext()) {
 			RevCommit currentCommit = i.next();
-			try {
-				List<Refactoring> refactoringsAtRevision = detectRefactorings(gitService, repository, handler, currentCommit);
-				refactoringsCount += refactoringsAtRevision.size();
-				
-			} catch (Exception e) {
-				logger.warn(String.format("Ignored revision %s due to error", currentCommit.getId().getName()), e);
-				handler.handleException(currentCommit.getId().getName(),e);
-				errorCommitsCount++;
-			}
+			if (currentCommit.getCommitterIdent().getWhen().after(since) ) {
+				if(currentCommit.getCommitterIdent().getWhen().before(until)){
+				System.out.println(currentCommit.getCommitterIdent().getWhen());
+				try {
+					List<Refactoring> refactoringsAtRevision = detectRefactorings(gitService, repository, handler, currentCommit);
+					refactoringsCount += refactoringsAtRevision.size();
 
-			commitsCount++;
-			long time2 = System.currentTimeMillis();
-			if ((time2 - time) > 20000) {
-				time = time2;
-				logger.info(String.format("Processing %s [Commits: %d, Errors: %d, Refactorings: %d]", projectName, commitsCount, errorCommitsCount, refactoringsCount));
+				} catch (Exception e) {
+					logger.warn(String.format("Ignored revision %s due to error", currentCommit.getId().getName()), e);
+					handler.handleException(currentCommit.getId().getName(), e);
+					errorCommitsCount++;
+				}
+
+				commitsCount++;
+				long time2 = System.currentTimeMillis();
+				if ((time2 - time) > 20000) {
+					time = time2;
+					logger.info(String.format("Processing %s [Commits: %d, Errors: %d, Refactorings: %d]", projectName, commitsCount, errorCommitsCount, refactoringsCount));
+				}
+			}
+			}
+			else{
+				break;
 			}
 		}
-
 		handler.onFinish(refactoringsCount, commitsCount, errorCommitsCount);
 		logger.info(String.format("Analyzed %s [Commits: %d, Errors: %d, Refactorings: %d]", projectName, commitsCount, errorCommitsCount, refactoringsCount));
 	}

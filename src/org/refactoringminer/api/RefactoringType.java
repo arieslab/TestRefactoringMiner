@@ -105,12 +105,13 @@ public enum RefactoringType {
     SPLIT_CONDITIONAL("Split Conditional", "Split Conditional (.+) to \\[(.+)\\] in method (.+) from class (.+)"),
     INVERT_CONDITION("Invert Condition", "Invert Condition (.+) to (.+) in method (.+) from class (.+)"),
     REPLACE_EXPECTED_WITH_ASSERT_THROWS("Replace @test(expected) with assertThrows", "Replace (.+) with (.+) in method (.+) from class (.+)"),
-    REPLACE_TRY_FAIL_WITH_RULE("Replace try/catch With Rule", "Replace (.+) with (.+) in method (.+) from class (.+)"),
+    REPLACE_TRY_FAIL_WITH_RULE("Replace Try/Catch With Rule", "Replace (.+) with (.+) in method (.+) from class (.+)"),
     ADD_ASSERT_ARG("Add Assert Argument", "Add Assert Argument (.+) in class (.+)"),
     REPLACE_NOT_OPERATOR("Replace NOT operator", "Replace (.+) in class (.+)" ),
     REPLACE_RESERVED_WORDS("Replace Reserved Words", "Replace (.+) in class (.+)"),
-    SPLIT_CONDITIONAL_ASSERT("Split Conditional Statement in Assertions", "Replace (.+) in class (.+)");
-
+    SPLIT_CONDITIONAL_ASSERT("Split Conditional Statement in Assertions", "Replace (.+) in class (.+)"),
+    REPLACE_RULE_WITH_ASSERT_THROWS("Replace Rule With AssertThrows", "Replace (.+) with (.+) in method (.+) from class (.+)"),
+    REPLACE_TRY_FAIL_WITH_ASSERT("Replace Try/Catch With AssertThrows", "Replace (.+) with (.+) in method (.+) from class (.+)");
 
     private String displayName;
     private Pattern regex;
@@ -209,12 +210,13 @@ public enum RefactoringType {
 //            SPLIT_CONDITIONAL,
 //            INVERT_CONDITION,
             ADD_ASSERT_ARG,
-            REPLACE_EXPECTED_WITH_ASSERT_THROWS,
             REPLACE_NOT_OPERATOR,
             REPLACE_RESERVED_WORDS,
             SPLIT_CONDITIONAL_ASSERT,
-
-//            REPLACE_TRY_FAIL_WITH_RULE
+            REPLACE_TRY_FAIL_WITH_RULE,
+            REPLACE_RULE_WITH_ASSERT_THROWS,
+            REPLACE_TRY_FAIL_WITH_ASSERT,
+            REPLACE_EXPECTED_WITH_ASSERT_THROWS,
     };
 
     private RefactoringType(String displayName, String regex, int... aggregateGroups) {

@@ -5295,6 +5295,7 @@ public class UMLOperationBodyMapper implements Comparable<UMLOperationBodyMapper
 			Replacement replacement = new MethodInvocationReplacement(invocationCoveringTheEntireStatement1.actualString(),
 					invocationCoveringTheEntireStatement2.actualString(), invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2, type);
 			replacementInfo.addReplacement(replacement);
+
 			return replacementInfo.getReplacements();
 		}
 		if(!methodInvocations1.isEmpty() && invocationCoveringTheEntireStatement2 != null) {
@@ -5335,6 +5336,7 @@ public class UMLOperationBodyMapper implements Comparable<UMLOperationBodyMapper
 		}
 		//method invocation has only changes in the arguments (different number of arguments)
 		if(invocationCoveringTheEntireStatement1 != null && invocationCoveringTheEntireStatement2 != null) {
+
 			if(invocationCoveringTheEntireStatement1.identicalWithMergedArguments(invocationCoveringTheEntireStatement2, replacementInfo.getReplacements(), parameterToArgumentMap)) {
 				return replacementInfo.getReplacements();
 			}
@@ -5350,11 +5352,13 @@ public class UMLOperationBodyMapper implements Comparable<UMLOperationBodyMapper
 		//		System.out.println(replacement.getBefore()+"   "+replacement.getAfter());
 				return replacementInfo.getReplacements();
 		}
-			if(invocationCoveringTheEntireStatement1.renamedWithDifferentArguments(invocationCoveringTheEntireStatement2, replacementInfo.getReplacements(), parameterToArgumentMap, UMLClassBaseDiff.MAX_OPERATION_NAME_DISTANCE, lambdaMappers)){
+			if(invocationCoveringTheEntireStatement1.getName().contains("assert")
+				&& invocationCoveringTheEntireStatement1.renamedWithDifferentArguments(invocationCoveringTheEntireStatement2, lambdaMappers)){
 				Replacement replacement = new MethodInvocationReplacement(invocationCoveringTheEntireStatement1.actualString(),
 						invocationCoveringTheEntireStatement2.actualString(), invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2, ReplacementType.METHOD_INVOCATION_ARGUMENT);
 				replacementInfo.addReplacement(replacement);
-		//		System.out.println(replacement.getBefore()+"   "+replacement.getAfter());
+		//		System.out.println(invocationCoveringTheEntireStatement1.actualString()+"   "+invocationCoveringTheEntireStatement2.actualString());
+
 				return replacementInfo.getReplacements();
 //				ReplaceNotOperatorDetection detector = new ReplaceNotOperatorDetection(invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2);
 //				ReplaceNotOperatorRefactoring notOperator = detector.check();

@@ -45,7 +45,8 @@ public class ExpectedAnnotationToAssertThrowsDetection {
                     .filter(lambda -> isEnclosedBy(lambda, operationInvocation))
                     .findAny()
                     .orElseThrow();
-            return new ExpectedAnnotationToAssertThrowsRefactoring(operationBefore, operationAfter, annotationChange, exception, lambda, operationInvocation);
+            return new ExpectedAnnotationToAssertThrowsRefactoring(operationBefore, operationAfter,
+                    annotationChange, exception, lambda, operationInvocation);
         } catch (NoSuchElementException ex) {
             return null;
         }

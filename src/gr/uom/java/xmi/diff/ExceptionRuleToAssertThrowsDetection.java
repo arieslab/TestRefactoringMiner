@@ -4,7 +4,6 @@ import gr.uom.java.xmi.UMLAttribute;
 import gr.uom.java.xmi.UMLOperation;
 import gr.uom.java.xmi.decomposition.*;
 import org.refactoringminer.api.Refactoring;
-import org.refactoringminer.api.RefactoringType;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -21,7 +20,7 @@ public class ExceptionRuleToAssertThrowsDetection {
     private final List<AbstractCodeFragment> removedStmts;
     private   UMLAttribute expectedExceptionFieldDeclaration;
     private  List<AbstractCall> expectInvocations;
-
+    
 
 
 
@@ -35,7 +34,8 @@ public class ExceptionRuleToAssertThrowsDetection {
         this.refactorings = refactorings;
     }
 
-    public ExceptionRuleToAssertThrowsRefactoring check() {
+    public ArrayList<ExceptionRuleToAssertThrowsRefactoring> check() {
+        ArrayList<ExceptionRuleToAssertThrowsRefactoring> lista = new ArrayList<>();
         try {
             expectedExceptionFieldDeclaration = removedAttributes.stream()
                     .filter(field -> field.getType().getClassType().equals("ExpectedException"))
@@ -45,9 +45,10 @@ public class ExceptionRuleToAssertThrowsDetection {
                     .collect(Collectors.toList());
 
             operationInvocation = getAssertThrows(operationAfter).stream()
-                    .filter(i -> containsAtLeastOneLineInCommon(operationBefore, i.getArguments().get(1)))
+                    .filter(i -> containsAtLeastOneLineInCommon(operationBefore, i.getArguments()))
                     .findAny()
                     .orElseThrow();
+
             lambda = operationAfter.getAllLambdas().stream()
                     .filter(lambda -> isEnclosedBy(lambda, operationInvocation))
                     .findAny()
@@ -55,11 +56,12 @@ public class ExceptionRuleToAssertThrowsDetection {
             var expectInvocation = expectInvocations.stream().filter(op ->
                     operationInvocation.actualString().contains(op.getArguments().get(0))).findAny().orElseThrow();
 
-            return new ExceptionRuleToAssertThrowsRefactoring(operationBefore, operationAfter,
-                    lambda, operationInvocation, expectedExceptionFieldDeclaration, expectInvocation);
+            lista.add( new ExceptionRuleToAssertThrowsRefactoring(operationBefore, operationAfter,
+                    lambda, operationInvocation, expectedExceptionFieldDeclaration, expectInvocation));
         } catch (NoSuchElementException ex) {
             return null;
         }
+        return lista;
     }
 
 
@@ -73,7 +75,11 @@ public class ExceptionRuleToAssertThrowsDetection {
                 invocationRange.getEndColumn() >= lambdaRange.getEndColumn();
     }
 
-    private boolean containsAtLeastOneLineInCommon(UMLOperation operation, String lambda) {
+    private boolean containsAtLeastOneLineInCommon(UMLOperation operation, List<String> lambdaActual) {
+        String lambda = lambdaActual.get(1);
+        if (lambdaActual.get(0).contains("\"")){
+            lambda = lambdaActual.get(2);
+        }
         return lambda
                 .lines()
                 .map(String::strip)
@@ -97,33 +103,17 @@ public class ExceptionRuleToAssertThrowsDetection {
                 .anyMatch(operationBodyLine -> operationBodyLine.equals(line));
     }
 
-    private Optional<ModifyMethodAnnotationRefactoring> getRemovedExpectedAttributeFromTestAnnotation() {
-        return refactorings.stream()
-                .filter(r -> r.getRefactoringType().equals(RefactoringType.MODIFY_METHOD_ANNOTATION))
-                .map(r -> (ModifyMethodAnnotationRefactoring) r)
-                .filter(r -> r.getOperationBefore().equals(operationBefore))
-                .filter(r -> r.getOperationAfter().equals(operationAfter))
-                .filter(r -> hasExpectedException(r.getAnnotationBefore()))
-                .filter(r -> !hasExpectedException(r.getAnnotationAfter()))
-                .findAny();
-    }
-
-    private boolean hasExpectedException(gr.uom.java.xmi.UMLAnnotation before) {
-        return before.isNormalAnnotation() && before.getTypeName().equals("Test") && before.getMemberValuePairs().containsKey("expected");
-    }
-
     private List<AbstractCall> getAssertThrows(UMLOperation operation) {
-        return operation.getAllOperationInvocations().stream()
+        var a = operation.getAllOperationInvocations().stream()
                 .filter((op) -> op.getName().equals("assertThrows") &&
                         (Objects.isNull(op.getExpression()) || op.getExpression().equals("Assert") || op.getExpression().equals("Assertions")))
                 .collect(Collectors.toList());
+//        for (int i = 0; i < a.size(); i++) {
+//            System.out.println(a.get(i).actualString());
+//
+//        }
+        return  a;
     }
-
-
-    /**
-     * Rule and expected exception
-     * */
-
 
     private static Stream<AbstractCall> detectAddedExpectInvocations(List<AbstractCodeFragment> addedStmts, UMLAttribute expectedExceptionRuleFieldDeclaration) {
         return extractMethodInvocationsStream(addedStmts)
@@ -135,8 +125,4 @@ public class ExceptionRuleToAssertThrowsDetection {
         return addedStmts.stream().flatMap(st -> st.getMethodInvocationMap().values().stream().flatMap(Collection::stream));
     }
 
-
-    private static boolean isAnyArgumentPassedTo(List<String> arguments, AbstractCall invocation) {
-        return arguments.contains(invocation.getArguments().get(0));
-    }
 }

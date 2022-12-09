@@ -26,9 +26,6 @@ public class TryWithFailToExpectedExceptionRuleDetection {
     private   UMLAttribute expectedExceptionFieldDeclaration;
     private  List<AbstractCall> expectInvocations;
 
-    public TryWithFailToExpectedExceptionRuleDetection(UMLOperationBodyMapper mapper, UMLClassBaseDiff classDiff) {
-        this(mapper,classDiff.addedAttributes);
-    }
 
     public TryWithFailToExpectedExceptionRuleDetection(UMLOperationBodyMapper mapper, List<UMLAttribute> addedAttributes) {
         this(mapper.getOperation1(), mapper.getOperation2(), mapper.getNonMappedInnerNodesT1(), mapper.getNonMappedLeavesT2(), addedAttributes);
@@ -59,7 +56,9 @@ public class TryWithFailToExpectedExceptionRuleDetection {
         var assertFailInvocation = assertFailInvocationsFound.get(0);
         var expectInvocation = expectInvocations.stream().filter(op -> capturedExceptions.contains(op.getArguments().get(0))).findAny().orElseThrow();
         var capturedException = expectInvocation.getArguments().get(0);
-        return new TryWithFailToExpectedExceptionRuleRefactoring(operationBefore, operationAfter, tryStmt, assertFailInvocation, capturedException, expectInvocation, expectedExceptionFieldDeclaration);
+        return new TryWithFailToExpectedExceptionRuleRefactoring(operationBefore, operationAfter,
+                tryStmt, assertFailInvocation, capturedException, expectInvocation,
+                expectedExceptionFieldDeclaration);
     }
 
     private boolean checkFromTryWithFail() {

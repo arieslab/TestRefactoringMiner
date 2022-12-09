@@ -19,17 +19,15 @@ public class TryWithFailToAssertRefactoring implements Refactoring {
     private final UMLOperation operationBefore;
     private final UMLOperation operationAfter;
     private final TryStatementObject tryStatement;
-    private final AbstractCall assertFailInvocation;
     private final AbstractCall assertThrows;
     private final LambdaExpressionObject lambda;
 
     public TryWithFailToAssertRefactoring(UMLOperation operationBefore, UMLOperation operationAfter,
-                                          TryStatementObject tryStmt, AbstractCall assertFailInvocation,
+                                          TryStatementObject tryStmt,
                                           AbstractCall operationInvocation, LambdaExpressionObject lambda) {
         this.operationBefore = operationBefore;
         this.operationAfter = operationAfter;
         this.tryStatement = tryStmt;
-        this.assertFailInvocation = assertFailInvocation;
         this.assertThrows = operationInvocation;
         this.lambda = lambda;
     }
@@ -50,9 +48,6 @@ public class TryWithFailToAssertRefactoring implements Refactoring {
                     .setDescription("source method's catch clause capturing the expected exception")
                     .setCodeElement(clause.toString()));
         }
-        ranges.add(assertFailInvocation.codeRange()
-                .setDescription("source method's assertFail invocation from the try-statement before migration")
-                .setCodeElement(assertFailInvocation.toString()));
         return ranges;
     }
 

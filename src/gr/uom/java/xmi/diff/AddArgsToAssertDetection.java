@@ -9,9 +9,6 @@ import java.util.*;
 
 public class AddArgsToAssertDetection {
     private final UMLOperationBodyMapper mapper;
-    private AbstractCall operation2;
-    private AbstractCall operation1;
-
 
     public AddArgsToAssertDetection(UMLOperationBodyMapper mapper) {
         this.mapper = mapper;
@@ -27,9 +24,9 @@ public class AddArgsToAssertDetection {
                     replacement.getBefore() != null && replacement.getAfter() != null ) {
                 if (replacement.getInvokedOperationBefore().getArguments().size() <
                         replacement.getInvokedOperationAfter().getArguments().size()) {
-                    List rem = new ArrayList(replacement.getInvokedOperationAfter().getArguments());
+                    ArrayList<String> rem = new ArrayList(replacement.getInvokedOperationAfter().getArguments());
                     rem.removeAll(replacement.getInvokedOperationBefore().getArguments());
-                    if (rem.size() == 1 && rem.get(0).toString().contains("\"")) {
+                    if (rem.size() == 1 && rem.get(0).contains("\"")) {
                         lista.add (new AddArgsToAssertRefactoring(replacement.getInvokedOperationBefore(), replacement.getInvokedOperationAfter()));
                     }
                 }

@@ -1,6 +1,5 @@
 package gr.uom.java.xmi.diff;
 
-import gr.uom.java.xmi.UMLAttribute;
 import gr.uom.java.xmi.UMLOperation;
 import gr.uom.java.xmi.decomposition.*;
 
@@ -10,8 +9,8 @@ import java.util.stream.Stream;
 
 public class TryWithFailToAssertDetection {
     private final UMLOperation operationBefore;
-    private AbstractCall operationInvocation;
-    private LambdaExpressionObject lambda;
+    private List<AbstractCall> operationInvocation  =new ArrayList<>();
+    private List<LambdaExpressionObject> lambda = new ArrayList<>();
     private final UMLOperation operationAfter;
     private final List<CompositeStatementObject> removedCompositeStmts;
     private final List<AbstractCodeFragment> addedStmts;
@@ -31,7 +30,7 @@ public class TryWithFailToAssertDetection {
         this.addedStmts = addedStmts;
     }
 
-    public TryWithFailToAssertRefactoring check() {
+    public ArrayList<TryWithFailToAssertRefactoring> check() {
         try {
             if (checkFromTryWithFail()) {
                 return createRefactoring();
@@ -43,23 +42,26 @@ public class TryWithFailToAssertDetection {
         }
     }
 
-    private TryWithFailToAssertRefactoring createRefactoring() {
-        var tryStmt = tryStatements.get(0);
-        var assertFailInvocation = assertFailInvocationsFound.get(0);
-
-        List<AbstractCall> assertThrowsList = getAssertThrows(operationAfter);
+    private ArrayList<TryWithFailToAssertRefactoring> createRefactoring() {
+        ArrayList<TryWithFailToAssertRefactoring> refac = new ArrayList<>();
 
         operationInvocation = getAssertThrows(operationAfter).stream()
                 .filter(i -> capturedExceptions.contains(i.getArguments().get(0)))
-                .findAny()
-                .orElseThrow();
+                .collect(Collectors.toList());
 
-        lambda = operationAfter.getAllLambdas().stream()
-                .filter(lambda -> operationInvocation.getArguments().contains(lambda.toString()))
-                .findAny()
-                .orElseThrow();
-        return new TryWithFailToAssertRefactoring(operationBefore, operationAfter,
-                tryStmt, assertFailInvocation, operationInvocation, lambda);
+
+        var lambdasAux = operationAfter.getAllLambdas();
+        if (!operationInvocation.isEmpty() && !lambdasAux.isEmpty())
+        for (int i = 0; i < operationInvocation.size(); i++) {
+            for (int j = 0; j < lambdasAux.size(); j++) {
+                if (operationInvocation.get(i).getArguments().contains(lambdasAux.get(j).toString())) {
+                    refac.add(new TryWithFailToAssertRefactoring(operationBefore, operationAfter,
+                            tryStatements.get(i), operationInvocation.get(i), lambdasAux.get(j)));
+                }
+            }
+        }
+
+        return refac;
     }
 
     private boolean checkFromTryWithFail() {

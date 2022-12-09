@@ -50,12 +50,12 @@ public class TestOperationDiff {
         return detector.check();
     }
 
-    private ExceptionRuleToAssertThrowsRefactoring getExceptionToAssertThows() {
+    private ArrayList<ExceptionRuleToAssertThrowsRefactoring> getExceptionToAssertThows() {
         ExceptionRuleToAssertThrowsDetection detector = new ExceptionRuleToAssertThrowsDetection(mapper, refactorings, removedAttributes);
         return detector.check();
     }
 
-    private TryWithFailToAssertRefactoring getTryToAssert() {
+    private ArrayList<TryWithFailToAssertRefactoring> getTryToAssert() {
         TryWithFailToAssertDetection detector = new TryWithFailToAssertDetection(mapper);
         return detector.check();
     }
@@ -65,6 +65,19 @@ public class TestOperationDiff {
         return detector1.check();
     }
 
+    private ArrayList<SplitConditionalAssertRefactoring> getSplitConditional() {
+        SplitConditionalAssertDetection detector1 = new SplitConditionalAssertDetection(mapper);
+        return detector1.check();
+    }
+    private ArrayList<ReplaceReservedWordsRefactoring> getReplaceReservedWords() {
+        ReplaceReservedWordsDetection detector = new ReplaceReservedWordsDetection(mapper);
+        return detector.check();
+    }
+
+    private ArrayList<ReplaceNotOperatorRefactoring> getReplaceNotOperator() {
+        ReplaceNotOperatorDetection detector = new ReplaceNotOperatorDetection(mapper);
+        return detector.check();
+    }
 
     public Set<Refactoring> getRefactorings() {
         Set<Refactoring> refactorings = new LinkedHashSet<>();
@@ -76,19 +89,33 @@ public class TestOperationDiff {
         if (Objects.nonNull(jUnit4To5Refactoring)) {
             refactorings.add(jUnit4To5Refactoring);
         }
-        ExceptionRuleToAssertThrowsRefactoring exceptionToAssertThows = getExceptionToAssertThows();
+        ArrayList<ExceptionRuleToAssertThrowsRefactoring> exceptionToAssertThows = getExceptionToAssertThows();
         if (Objects.nonNull(exceptionToAssertThows)) {
-            refactorings.add(exceptionToAssertThows);
+            refactorings.addAll(exceptionToAssertThows);
         }
-        TryWithFailToAssertRefactoring tryToAssert = getTryToAssert();
+        ArrayList<TryWithFailToAssertRefactoring> tryToAssert = getTryToAssert();
         if (Objects.nonNull(tryToAssert)) {
-            refactorings.add(tryToAssert);
+            refactorings.addAll(tryToAssert);
         }
         ArrayList<AddArgsToAssertRefactoring> assertArg = getAddArgs();
         if(Objects.nonNull(assertArg)){
             refactorings.addAll(assertArg);
         }
+        ArrayList<SplitConditionalAssertRefactoring> splitConditional = getSplitConditional();
+        if(Objects.nonNull(splitConditional)){
+            refactorings.addAll(splitConditional);
+        }
+        ArrayList<ReplaceReservedWordsRefactoring> replacedReservedWords = getReplaceReservedWords();
+        if(Objects.nonNull(replacedReservedWords)){
+            refactorings.addAll(replacedReservedWords);
+        }
+        ArrayList<ReplaceNotOperatorRefactoring> replacedNotOperator = getReplaceNotOperator();
+        if(Objects.nonNull(replacedNotOperator)){
+            refactorings.addAll(replacedNotOperator);
+        }
         return refactorings;
     }
+
+
 
 }

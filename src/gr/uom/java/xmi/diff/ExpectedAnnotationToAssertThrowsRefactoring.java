@@ -109,11 +109,6 @@ public class ExpectedAnnotationToAssertThrowsRefactoring implements Refactoring 
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(operationAfter, operationBefore);
-    }
-
-    @Override
     public boolean equals(Object obj) {
         if (this == obj)
             return true;
