@@ -74,6 +74,15 @@ public class GitHistoryRefactoringMinerImpl implements GitHistoryRefactoringMine
 		this.setRefactoringTypesToConsider(RefactoringType.ALL);
 	}
 
+	public GitHistoryRefactoringMinerImpl(String mode) {
+		if (mode.equals("T") || mode.equals("t")) {
+			this.setRefactoringTypesToConsider(RefactoringType.TEST);
+		}
+		if (mode.equals("P") || mode.equals("p")) {
+			this.setRefactoringTypesToConsider(RefactoringType.PROD);
+		}
+	}
+
 	public void setRefactoringTypesToConsider(RefactoringType ... types) {
 		this.refactoringTypesToConsider = new HashSet<RefactoringType>();
 		for (RefactoringType type : types) {
@@ -90,15 +99,15 @@ public class GitHistoryRefactoringMinerImpl implements GitHistoryRefactoringMine
 		File projectFolder = metadataFolder.getParentFile();
 		String projectName = projectFolder.getName();
 
-		Date since = new SimpleDateFormat("yyyy-MM-dd").parse("2019-01-01");
-		Date until = new SimpleDateFormat("yyyy-MM-dd").parse("2022-07-21");
+//		Date since = new SimpleDateFormat("yyyy-MM-dd").parse("2018-12-31");
+//		Date until = new SimpleDateFormat("yyyy-MM-dd").parse("2019-11-18");
 
 		long time = System.currentTimeMillis();
 		while (i.hasNext()) {
 			RevCommit currentCommit = i.next();
-			if (currentCommit.getCommitterIdent().getWhen().after(since) ) {
-				if(currentCommit.getCommitterIdent().getWhen().before(until)){
-				System.out.println(currentCommit.getCommitterIdent().getWhen());
+//			if (currentCommit.getCommitterIdent().getWhen().after(since) ) {
+//				if(currentCommit.getCommitterIdent().getWhen().before(until)){
+//				System.out.println(currentCommit.getCommitterIdent().getWhen());
 				try {
 					List<Refactoring> refactoringsAtRevision = detectRefactorings(gitService, repository, handler, currentCommit);
 					refactoringsCount += refactoringsAtRevision.size();
@@ -116,11 +125,11 @@ public class GitHistoryRefactoringMinerImpl implements GitHistoryRefactoringMine
 					logger.info(String.format("Processing %s [Commits: %d, Errors: %d, Refactorings: %d]", projectName, commitsCount, errorCommitsCount, refactoringsCount));
 				}
 			}
-			}
-			else{
-				break;
-			}
-		}
+//			}
+//			else{
+//				break;
+//			}
+//		}
 		handler.onFinish(refactoringsCount, commitsCount, errorCommitsCount);
 		logger.info(String.format("Analyzed %s [Commits: %d, Errors: %d, Refactorings: %d]", projectName, commitsCount, errorCommitsCount, refactoringsCount));
 	}
