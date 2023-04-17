@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -33,10 +34,14 @@ public class RefactoringMiner {
 
 		if (option.equalsIgnoreCase("-a")) {
 			detectAll(args);
+		} else if (option.equalsIgnoreCase("-am")) {
+			detectAllMode(args);
 		} else if (option.equalsIgnoreCase("-bc")) {
 			detectBetweenCommits(args);
 		} else if (option.equalsIgnoreCase("-bt")) {
 			detectBetweenTags(args);
+		} else if (option.equalsIgnoreCase("-btm")) {
+			detectBetweenTagsMode(args);
 		} else if (option.equalsIgnoreCase("-c")) {
 			detectAtCommit(args);
 		} else if (option.equalsIgnoreCase("-gc")) {
@@ -67,7 +72,49 @@ public class RefactoringMiner {
 				private int commitCount = 0;
 				@Override
 				public void handle(String commitId, List<Refactoring> refactorings) {
-					System.out.println("------- "+commitId);
+					//System.out.println("------- "+commitId);
+					if(commitCount > 0) {
+						betweenCommitsJSON();
+					}
+					commitJSON(gitURL, commitId, refactorings);
+					commitCount++;
+				}
+
+				@Override
+				public void onFinish(int refactoringsCount, int commitsCount, int errorCommitsCount) {
+					System.out.println(String.format("Total count: [Commits: %d, Errors: %d, Refactorings: %d]",
+							commitsCount, errorCommitsCount, refactoringsCount));
+				}
+
+				@Override
+				public void handleException(String commit, Exception e) {
+					System.err.println("Error processing commit " + commit);
+					e.printStackTrace(System.err);
+				}
+			});
+			endJSON();
+		}
+	}
+
+	public static void detectAllMode(String[] args) throws Exception {
+		int maxArgLength = processJSONoption(args, 4);
+		if (args.length > maxArgLength) {
+			throw argumentException();
+		}
+		String folder = args[1];
+		String branch = args[2];
+		String mode = args[3];
+
+		GitService gitService = new GitServiceImpl();
+		try (Repository repo = gitService.openRepository(folder)) {
+			String gitURL = repo.getConfig().getString("remote", "origin", "url");
+			GitHistoryRefactoringMiner detector = new GitHistoryRefactoringMinerImpl(mode);
+			startJSON();
+			detector.detectAll(repo, branch, new RefactoringHandler() {
+				private int commitCount = 0;
+				@Override
+				public void handle(String commitId, List<Refactoring> refactorings) {
+					//System.out.println("------- "+commitId);
 					if(commitCount > 0) {
 						betweenCommitsJSON();
 					}
@@ -147,6 +194,48 @@ public class RefactoringMiner {
 		try (Repository repo = gitService.openRepository(folder)) {
 			String gitURL = repo.getConfig().getString("remote", "origin", "url");
 			GitHistoryRefactoringMiner detector = new GitHistoryRefactoringMinerImpl();
+			startJSON();
+			detector.detectBetweenTags(repo, startTag, endTag, new RefactoringHandler() {
+				private int commitCount = 0;
+				@Override
+				public void handle(String commitId, List<Refactoring> refactorings) {
+					if(commitCount > 0) {
+						betweenCommitsJSON();
+					}
+					commitJSON(gitURL, commitId, refactorings);
+					commitCount++;
+				}
+
+				@Override
+				public void onFinish(int refactoringsCount, int commitsCount, int errorCommitsCount) {
+					System.out.println(String.format("Total count: [Commits: %d, Errors: %d, Refactorings: %d]",
+							commitsCount, errorCommitsCount, refactoringsCount));
+				}
+
+				@Override
+				public void handleException(String commit, Exception e) {
+					System.err.println("Error processing commit " + commit);
+					e.printStackTrace(System.err);
+				}
+			});
+			endJSON();
+		}
+	}
+
+	public static void detectBetweenTagsMode(String[] args) throws Exception {
+		int maxArgLength = processJSONoption(args, 5);
+
+		if (!(args.length == maxArgLength-1 || args.length == maxArgLength)) {
+			throw argumentException();
+		}
+		String folder = args[1];
+		String startTag = args[2];
+		String endTag = args[3];
+		String mode = args[4];
+		GitService gitService = new GitServiceImpl();
+		try (Repository repo = gitService.openRepository(folder)) {
+			String gitURL = repo.getConfig().getString("remote", "origin", "url");
+			GitHistoryRefactoringMiner detector = new GitHistoryRefactoringMinerImpl(mode);
 			startJSON();
 			detector.detectBetweenTags(repo, startTag, endTag, new RefactoringHandler() {
 				private int commitCount = 0;
@@ -355,11 +444,15 @@ public class RefactoringMiner {
 	private static void printTips() {
 		System.out.println("-h\t\t\t\t\t\t\t\t\t\t\tShow options");
 		System.out.println(
-				"-a <git-repo-folder> <branch> -json <path-to-json-file>\t\t\t\t\tDetect all refactorings at <branch> for <git-repo-folder>. If <branch> is not specified, commits from all branches are analyzed.");
+				"-a <git-repo-folder> <branch> -json <path-to-json-file>\t\t\t\t\tDetect all refactorings at <branch> for <git-repo-folder>.");
+		System.out.println(
+				"-am <git-repo-folder> <branch> <mode> -json <path-to-json-file>\t\t\t\t\tDetect all refactorings at <branch> for <git-repo-folder>. Specify the <mode> as T to detect refactorings in the test code and P in the production code.");
 		System.out.println(
 				"-bc <git-repo-folder> <start-commit-sha1> <end-commit-sha1> -json <path-to-json-file>\tDetect refactorings between <start-commit-sha1> and <end-commit-sha1> for project <git-repo-folder>");
 		System.out.println(
 				"-bt <git-repo-folder> <start-tag> <end-tag> -json <path-to-json-file>\t\t\tDetect refactorings between <start-tag> and <end-tag> for project <git-repo-folder>");
+		System.out.println(
+				"-btm <git-repo-folder> <start-tag> <end-tag> <mode> -json <path-to-json-file>\t\t\tDetect refactorings between <start-tag> and <end-tag> for project <git-repo-folder>. Specify the <mode> as T to detect refactorings in the test code and P in the production code.");
 		System.out.println(
 				"-c <git-repo-folder> <commit-sha1> -json <path-to-json-file>\t\t\t\tDetect refactorings at specified commit <commit-sha1> for project <git-repo-folder>");
 		System.out.println(
