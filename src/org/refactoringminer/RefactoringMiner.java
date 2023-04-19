@@ -32,6 +32,8 @@ public class RefactoringMiner {
 			return;
 		}
 
+		System.out.println("Running RefactoringMiner...");
+
 		if (option.equalsIgnoreCase("-a")) {
 			detectAll(args);
 		} else if (option.equalsIgnoreCase("-am")) {
@@ -63,6 +65,7 @@ public class RefactoringMiner {
 		if (containsBranchArgument(args)) {
 			branch = args[2];
 		}
+
 		GitService gitService = new GitServiceImpl();
 		try (Repository repo = gitService.openRepository(folder)) {
 			String gitURL = repo.getConfig().getString("remote", "origin", "url");
